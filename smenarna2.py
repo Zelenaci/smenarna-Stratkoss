@@ -1,24 +1,12 @@
-#sr/bin/env python3
-
 from os.path import basename, splitext
 import tkinter as tk
+import random
 from tkinter import *
-
-
-# from tkinter import ttk
-
 
 class About(tk.Toplevel):
     def __init__(self, parent):
         super().__init__(parent, class_=parent.name)
         self.config()
-
-        btn = tk.Button(self, text="Konec", command=self.close)
-        btn.pack()
-
-    def close(self):
-        self.destroy()
-
 
 class Application(tk.Tk):
     name = basename(splitext(basename(__file__.capitalize()))[0])
@@ -26,77 +14,81 @@ class Application(tk.Tk):
 
     def __init__(self):
         super().__init__(className=self.name)
-        v1 = tk.IntVar(self)
-        v2 = tk.IntVar(self)
         self.title(self.name)
-        self.lbl = tk.Label(self, text="Směnárna", borderwidth=14)
-        self.lbl.pack()
-        #Transakce
+        self.lbl = tk.Label(self, text="Směnárna")
+        self.lbl.grid(row=0, column=0, padx=20)
+        self.geometry("225x600")
+        self.configure(bg='#FFFFFF')
+
+       
         self.variable = tk.IntVar(self)
-        self.lbl1 = tk.Label(self, text="Transakce:")
-        self.lbl1.pack(anchor=W)
-        self.radiobutton1 = Radiobutton(self, text="Nákup", variable=self.variable, value=1).pack(anchor=W)
-        self.radiobutton2 = Radiobutton(self, text="Prodej", variable=self.variable, value=2).pack(anchor=W)
+        self.radiobutton1 = Radiobutton(self, text="Nakoupit",variable=self.variable, value=1).grid(row=1, column=0)
+        self.radiobutton2 = Radiobutton(self, text="Prodat", variable=self.variable, value=2).grid(row=2, column=0)
         self.variable.set(1)
-        #Měna
-        self.lbl2 = tk.Label(self, text="Měna:")
-        self.lbl2.pack(anchor=W)
+
+        
+        self.lbl2 = tk.Label(self, text="Nabídka měn")
+        self.lbl2.grid(row=3, column=0)
         self.listbox = tk.Listbox(self)
-        self.listbox.pack(anchor=W)
-        self.listbox.bind("<ButtonRelease-1>", self.kliknu)       
+        self.listbox.grid(row=4, column=0)
+        self.listbox.bind("<ButtonRelease-1>", self.kliknuti)       
         f = open('listek.txt', 'r')
         slovnik = {}
         for line in f:
             self.listbox.insert(tk.END,line.split()[0])
             slovnik[line.split()[0]] = (line.split()[1:])
-        #Kurz
-        self.lbl3 = tk.Label(self, text="Kurz:")
-        self.lbl3.pack(anchor=W)
-        self.price = tk.StringVar()
-        self.amount = tk.IntVar()
-        self.amountLbl= tk.Label(self, textvariable= self.amount) 
-        self.amountLbl.pack()
-        self.pricel= tk.Label(self, textvariable= self.price) 
-        self.pricel.pack()
-        #Výpočet
-        self.lbl2 = tk.Label(self, text="Výpočet:")
-        self.lbl2.pack(anchor=W)
-        self.entry = tk.Entry(self)
-        self.entry.pack()
-        self.btn2 = tk.Button(self, text="Výpočet", command=self.vypocet)
-        self.btn2.pack()
+
+     
+        self.lbl3 = tk.Label(self, text="Kurz")
+        self.lbl3.grid(row=5, column=0)
+        self.hodnota = tk.StringVar()
+        self.cena = tk.IntVar()
+        self.cenaLbl= tk.Label(self, textvariable=self.cena) 
+        self.cenaLbl.grid(row=6, column=0)
+        self.hodnotal= tk.Label(self, textvariable= self.hodnota) 
+        self.hodnotal.grid(row=7, column=0)
+
+
+        self.lbl2 = tk.Label(self, text="Počet:")
+        self.lbl2.grid(row=8, column=0)
+        self.mnozstvi = tk.Entry(self,)
+        self.mnozstvi.grid(row=9, column=0)
+        self.btn2 = tk.Button(self, text="Vypočítej", command=self.vypocet)
+        self.btn2.grid(row=10, column=0)
         self.vysledek = tk.IntVar()
         self.vysledekl= tk.Label(self, textvariable= self.vysledek)
-        self.vysledekl.pack()
-        #Quit
+        self.vysledekl.grid(row=11, column=0)
+        self.lbl4 = tk.Label(self)
+        self.lbl4.grid(row=12, column=0)
+        
+
         self.bind("<Escape>", self.quit)
-        self.btn1 = tk.Button(self, text="Quit", command=self.quit)
-        self.btn1.pack()
+        self.btn1 = tk.Button(self, text="Konec")
+        self.btn1.grid(row=13, column=0)
 
     
-    def vypocet(self,event=None):  
-        a = int(self.entry.get())
-        b = int(self.amount.get())
-        c = float(self.price.get().replace(",","."))
+    def vypocet(self,event=None):
+
+        a = int(self.mnozstvi.get())
+        b = int(self.cena.get())
+        c = float(self.hodnota.get().replace(",","."))
         self.vysledekVar = float(a*c/b)
         self.vysledek.set(self.vysledekVar)
 
-    
-    def kliknu(self, event):
+    def kliknuti(self, event):
         index = self.listbox.curselection()[0]
-        f = open("/Users/davidstratil/Documents/Python_Work/listek.txt","r")
+        f = open("listek.txt")
         self.lines = f.readlines()
-        self.amountVar = self.lines[index].split()[1]
-        self.amount.set(self.amountVar)
+        self.cenaVar = self.lines[index].split()[1]
+        self.cena.set(self.cenaVar)
         if self.variable.get() == 1: 
-            self.priceVar = self.lines[index].split()[3] 
+            self.hodnotaVar = self.lines[index].split()[3] 
         else:
-            self.priceVar = self.lines[index].split()[2] 
-        self.price.set(self.priceVar)
-       
+            self.hodnotaVar = self.lines[index].split()[2] 
+        self.hodnota.set(self.hodnotaVar)
+
     def quit(self, event=None):
         super().quit()
-
 
 app = Application()
 app.mainloop()
